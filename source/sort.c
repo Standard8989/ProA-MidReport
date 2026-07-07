@@ -187,6 +187,10 @@ static inline void swap(int *lhs, int *rhs) {
 }
 
 void print_data(Data data) {
+    if (data.size == 0) {
+        return;
+    }
+
     for (size_t i = 0; i < data.size - 1; i++) {
         printf("%d ", data.data[i]);
     }
@@ -238,45 +242,34 @@ void bubble_sort(Data data) {
 void quick_sort(Data data) {
     size_t left_accessor = 0;
     size_t right_accessor = data.size - 1;
-    printf("all: ");
-    print_data(data);
 
     if (data.size == 2) {
         if (data.data[0] > data.data[1]) {
             swap(data.data, data.data + 1);
         }
-
         return;
     }
     else if (data.size <= 1) {
         return;
     }
 
-    // swap(data.data + (data.size / 2), data.data + data.size - 1);
     int pivot = data.data[data.size / 2];
     while (true) {
-        while (left_accessor < right_accessor && data.data[right_accessor] >= pivot) {
+        while (right_accessor > 0 && data.data[right_accessor] > pivot) {
             right_accessor--;
         }
-        while (left_accessor < right_accessor && data.data[left_accessor] <= pivot) {
+        while (left_accessor < data.size && data.data[left_accessor] < pivot) {
             left_accessor++;
         }
 
-        if (left_accessor == right_accessor) {
+        if (left_accessor >= right_accessor) {
             Data left_data;
             left_data.data = data.data;
-            left_data.size = left_accessor + 1;
+            left_data.size = right_accessor + 1;
 
             Data right_data;
-            right_data.data = data.data + left_accessor + 1;
-            right_data.size = data.size - left_accessor - 1;
-
-            printf("pivot: %d\n", pivot);
-            printf("left: ");
-            print_data(left_data);
-            printf("right: ");
-            print_data(right_data);
-            new_line();
+            right_data.data = data.data + right_accessor + 1;
+            right_data.size = data.size - right_accessor - 1;
 
             quick_sort(left_data);
             quick_sort(right_data);
@@ -285,6 +278,8 @@ void quick_sort(Data data) {
         }
 
         swap(data.data + left_accessor, data.data + right_accessor);
+        left_accessor++;
+        right_accessor--;
     }
 }
 
@@ -293,7 +288,7 @@ void merge_sort(Data data) {
 
 int main() {
     Config config;
-    config.data_size = 1e5;
+    config.data_size = 1e8;
     config.seed = 1;
     config.mode = RANDOM;
 
@@ -301,18 +296,12 @@ int main() {
     Data data = gen_data(&config);
     puts("test case is generated");
     print_config(&config);
-    puts("");
-
-    int array[] = {5, 6, 4, 7, 5, 13, 2, 4, 9, 6, 4, 3, 6, 6, 4, 12, 15};
-    Data second;
-    second.data = array;
-    second.size = sizeof(array) / sizeof(array[0]);
+    new_line();
 
     // TEST_CONDITION_WITH_DATA(selection_sort, data, true);
     // TEST_CONDITION_WITH_DATA(insertion_sort, data, true);
     // TEST_CONDITION_WITH_DATA(bubble_sort, data, true);
-    TEST_CONDITION_WITH_DATA(quick_sort, second, true);
-    // TEST_CONDITION_WITH_DATA(quick_sort, data, true);
+    TEST_CONDITION_WITH_DATA(quick_sort, data, true);
 
     free_data(data);
 
