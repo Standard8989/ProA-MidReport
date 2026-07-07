@@ -284,6 +284,62 @@ void quick_sort(Data data) {
 }
 
 void merge_sort(Data data) {
+    if (data.size == 1) {
+        return;
+    }
+    else if (data.size == 2) {
+        if (data.data[0] > data.data[1]) {
+            swap(data.data, data.data + 1);
+        }
+        return;
+    }
+
+    size_t mid = data.size / 2;
+
+    Data left_data;
+    left_data.data = data.data;
+    left_data.size = mid;
+
+    Data right_data;
+    right_data.data = data.data + mid;
+    right_data.size = data.size - mid;
+
+    merge_sort(left_data);
+    merge_sort(right_data);
+
+    size_t left_accessor = 0;
+    size_t right_accessor = mid;
+
+    Data work_space = alloc_data(data.size);
+    size_t work_space_accessor = 0;
+
+    while (true) {
+        bool left_fin = left_accessor == mid;
+        bool right_fin = right_accessor == data.size;
+
+        if (left_fin && right_fin) {
+            break;
+        }
+        else if (left_fin) {
+            while (right_accessor != data.size) {
+                work_space.data[work_space_accessor++] = data.data[right_accessor++];
+            }
+            break;
+        }
+        else if (right_fin) {
+            while (left_accessor != mid) {
+                work_space.data[work_space_accessor++] = data.data[left_accessor++];
+            }
+            break;
+        }
+        else {
+            work_space.data[work_space_accessor++] =
+                data.data[left_accessor] < data.data[right_accessor] ? data.data[left_accessor++] : data.data[right_accessor++];
+        }
+    }
+
+    memcpy(data.data, work_space.data, data.size * sizeof(int));
+    free_data(work_space);
 }
 
 int main() {
@@ -302,6 +358,7 @@ int main() {
     // TEST_CONDITION_WITH_DATA(insertion_sort, data, true);
     // TEST_CONDITION_WITH_DATA(bubble_sort, data, true);
     TEST_CONDITION_WITH_DATA(quick_sort, data, true);
+    TEST_CONDITION_WITH_DATA(merge_sort, data, true);
 
     free_data(data);
 
