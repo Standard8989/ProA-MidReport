@@ -1,11 +1,11 @@
+#include <errno.h>
+#include <error.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <error.h>
-#include <errno.h>
-#include <stdbool.h>
 #include <string.h>
+#include <time.h>
 
 #define TEST_CONDITION(func, config, do_check) test_condition(func, &config, do_check, #func)
 #define TEST_CONDITION_WITH_DATA(func, data, do_check) test_condition_with_data(func, data, do_check, #func)
@@ -40,7 +40,7 @@ Data alloc_data(size_t size) {
     data.size = size;
     data.data = (int *)malloc(sizeof(int) * size);
 
-    if(data.data == NULL) {
+    if (data.data == NULL) {
         fprintf(stderr, "error: in alloc_data(), failed to allocate %zu bytes.\n", size);
         fprintf(stderr, "malloc error(%s)", strerror(errno));
 
@@ -103,12 +103,12 @@ void print_config(const Config *config) {
     printf("%smode: %s\n", PRINT_CONFIG_INDENT, mode_name[config->mode]);
     printf("%sseed: %u\n", PRINT_CONFIG_INDENT, config->seed);
     printf("%sdata_size: %zu\n", PRINT_CONFIG_INDENT, config->data_size);
-    if(config->mode == PARTIAL_RANDOM) {
+    if (config->mode == PARTIAL_RANDOM) {
         printf("%sration: %lf\n", PRINT_CONFIG_INDENT, config->ration);
     }
 }
 
-typedef void(*SortAlgorithm)(Data);
+typedef void (*SortAlgorithm)(Data);
 
 void test_condition(SortAlgorithm func, const Config *config, bool do_check, const char *algorithm_name) {
     puts("generating test case...");
@@ -126,17 +126,17 @@ void test_condition(SortAlgorithm func, const Config *config, bool do_check, con
     printf("\ttime: %.8lf\n", time);
     puts("");
 
-    if(do_check) {
+    if (do_check) {
         puts("checking...");
         bool flag = true;
-        for(size_t i = 1; i < data.size; i++) {
-            if(data.data[i - 1] > data.data[i]) {
+        for (size_t i = 1; i < data.size; i++) {
+            if (data.data[i - 1] > data.data[i]) {
                 flag = false;
                 break;
             }
         }
 
-        if(flag) {
+        if (flag) {
             puts("succeed!");
         }
         else {
@@ -157,17 +157,17 @@ int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, const
     printf("\ttime(ms): %d\n", (int)(time * 1000));
     puts("");
 
-    if(do_check) {
+    if (do_check) {
         puts("checking...");
         bool flag = true;
-        for(size_t i = 1; i < data.size; i++) {
-            if(data.data[i - 1] > data.data[i]) {
+        for (size_t i = 1; i < data.size; i++) {
+            if (data.data[i - 1] > data.data[i]) {
                 flag = false;
                 break;
             }
         }
 
-        if(flag) {
+        if (flag) {
             puts("succeed!");
         }
         else {
@@ -186,6 +186,17 @@ static inline void swap(int *lhs, int *rhs) {
     *rhs = temp;
 }
 
+void print_data(Data data) {
+    for (size_t i = 0; i < data.size - 1; i++) {
+        printf("%d ", data.data[i]);
+    }
+    printf("%d\n", data.data[data.size - 1]);
+}
+
+void new_line() {
+    putchar('\n');
+}
+
 void selection_sort(Data data) {
     int min;
     for (size_t i = 0; i < data.size; i++) {
@@ -199,25 +210,25 @@ void selection_sort(Data data) {
     }
 }
 
-void insertion_sort(Data data){
-    for(size_t manipulating_pos = 1; manipulating_pos < data.size; manipulating_pos++) {
+void insertion_sort(Data data) {
+    for (size_t manipulating_pos = 1; manipulating_pos < data.size; manipulating_pos++) {
         size_t i;
-        for(i = 0; i < manipulating_pos; i++) {
-            if(data.data[i] > data.data[manipulating_pos]) {
+        for (i = 0; i < manipulating_pos; i++) {
+            if (data.data[i] > data.data[manipulating_pos]) {
                 break;
             }
         }
 
-        for(; i < manipulating_pos; i++) {
+        for (; i < manipulating_pos; i++) {
             swap(data.data + i, data.data + manipulating_pos);
         }
     }
 }
 
 void bubble_sort(Data data) {
-    for(size_t i = 1; i < data.size; i++) {
-        for(size_t j = 0; j < data.size - i; j++) {
-            if(data.data[j] > data.data[j + 1]) {
+    for (size_t i = 1; i < data.size; i++) {
+        for (size_t j = 0; j < data.size - i; j++) {
+            if (data.data[j] > data.data[j + 1]) {
                 swap(data.data + j, data.data + j + 1);
             }
         }
@@ -225,17 +236,64 @@ void bubble_sort(Data data) {
 }
 
 void quick_sort(Data data) {
-    while(true) {
+    size_t left_accessor = 0;
+    size_t right_accessor = data.size - 1;
+    printf("all: ");
+    print_data(data);
+
+    if (data.size == 2) {
+        if (data.data[0] > data.data[1]) {
+            swap(data.data, data.data + 1);
+        }
+
+        return;
+    }
+    else if (data.size <= 1) {
+        return;
+    }
+
+    // swap(data.data + (data.size / 2), data.data + data.size - 1);
+    int pivot = data.data[data.size / 2];
+    while (true) {
+        while (left_accessor < right_accessor && data.data[right_accessor] >= pivot) {
+            right_accessor--;
+        }
+        while (left_accessor < right_accessor && data.data[left_accessor] <= pivot) {
+            left_accessor++;
+        }
+
+        if (left_accessor == right_accessor) {
+            Data left_data;
+            left_data.data = data.data;
+            left_data.size = left_accessor + 1;
+
+            Data right_data;
+            right_data.data = data.data + left_accessor + 1;
+            right_data.size = data.size - left_accessor - 1;
+
+            printf("pivot: %d\n", pivot);
+            printf("left: ");
+            print_data(left_data);
+            printf("right: ");
+            print_data(right_data);
+            new_line();
+
+            quick_sort(left_data);
+            quick_sort(right_data);
+
+            break;
+        }
+
+        swap(data.data + left_accessor, data.data + right_accessor);
     }
 }
 
 void merge_sort(Data data) {
-
 }
 
 int main() {
     Config config;
-    config.data_size = 1e+5;
+    config.data_size = 1e5;
     config.seed = 1;
     config.mode = RANDOM;
 
@@ -245,9 +303,18 @@ int main() {
     print_config(&config);
     puts("");
 
-    TEST_CONDITION_WITH_DATA(selection_sort, data, true);
-    TEST_CONDITION_WITH_DATA(insertion_sort, data, true);
-    TEST_CONDITION_WITH_DATA(bubble_sort, data, true);
+    int array[] = {5, 6, 4, 7, 5, 13, 2, 4, 9, 6, 4, 3, 6, 6, 4, 12, 15};
+    Data second;
+    second.data = array;
+    second.size = sizeof(array) / sizeof(array[0]);
+
+    // TEST_CONDITION_WITH_DATA(selection_sort, data, true);
+    // TEST_CONDITION_WITH_DATA(insertion_sort, data, true);
+    // TEST_CONDITION_WITH_DATA(bubble_sort, data, true);
+    TEST_CONDITION_WITH_DATA(quick_sort, second, true);
+    // TEST_CONDITION_WITH_DATA(quick_sort, data, true);
+
+    free_data(data);
 
     return 0;
 }
