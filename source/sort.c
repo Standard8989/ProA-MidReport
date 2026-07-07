@@ -108,6 +108,27 @@ void print_config(const Config *config) {
     }
 }
 
+static inline void swap(int *lhs, int *rhs) {
+    int temp = *lhs;
+    *lhs = *rhs;
+    *rhs = temp;
+}
+
+void print_data(Data data) {
+    if (data.size == 0) {
+        return;
+    }
+
+    for (size_t i = 0; i < data.size - 1; i++) {
+        printf("%d ", data.data[i]);
+    }
+    printf("%d\n", data.data[data.size - 1]);
+}
+
+void new_line() {
+    putchar('\n');
+}
+
 typedef void (*SortAlgorithm)(Data);
 
 void test_condition(SortAlgorithm func, const Config *config, bool do_check, const char *algorithm_name) {
@@ -178,27 +199,6 @@ int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, const
     puts("");
 
     return (int)(time * 1000);
-}
-
-static inline void swap(int *lhs, int *rhs) {
-    int temp = *lhs;
-    *lhs = *rhs;
-    *rhs = temp;
-}
-
-void print_data(Data data) {
-    if (data.size == 0) {
-        return;
-    }
-
-    for (size_t i = 0; i < data.size - 1; i++) {
-        printf("%d ", data.data[i]);
-    }
-    printf("%d\n", data.data[data.size - 1]);
-}
-
-void new_line() {
-    putchar('\n');
 }
 
 void selection_sort(Data data) {
