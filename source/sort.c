@@ -9,6 +9,8 @@
 
 #define TEST_CONDITION(func, config, do_check) test_condition(func, &config, do_check, #func)
 #define TEST_CONDITION_WITH_DATA(func, data, do_check) test_condition_with_data(func, data, do_check, #func)
+
+#define MIN(lhs, rhs) ((lhs) < (rhs) ? (lhs) : (rhs))
 const char *PRINT_CONFIG_INDENT = "    ";
 
 typedef struct {
@@ -35,7 +37,7 @@ typedef struct {
     double ration;
 } Config;
 
-Data alloc_data(size_t size) {
+Data alloc_data(const size_t size) {
     Data data;
     data.size = size;
     data.data = (int *)malloc(sizeof(int) * size);
@@ -131,43 +133,6 @@ void new_line() {
 
 typedef void (*SortAlgorithm)(Data);
 
-void test_condition(SortAlgorithm func, const Config *config, bool do_check, const char *algorithm_name) {
-    puts("generating test case...");
-    Data data = gen_data(config);
-    puts("test case is generated");
-    print_config(config);
-    puts("");
-
-    printf("start sorting with: %s\n", algorithm_name);
-    puts("sorting...");
-    get_elapsed_time();
-    func(data);
-    double time = get_elapsed_time();
-    puts("finished sorting!");
-    printf("\ttime: %.8lf\n", time);
-    puts("");
-
-    if (do_check) {
-        puts("checking...");
-        bool flag = true;
-        for (size_t i = 1; i < data.size; i++) {
-            if (data.data[i - 1] > data.data[i]) {
-                flag = false;
-                break;
-            }
-        }
-
-        if (flag) {
-            puts("succeed!");
-        }
-        else {
-            puts("failed to sort");
-        }
-    }
-
-    free_data(data);
-}
-
 int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, const char *algorithm_name) {
     printf("start sorting with: %s\n", algorithm_name);
     puts("sorting...");
@@ -176,7 +141,7 @@ int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, const
     double time = get_elapsed_time();
     puts("finished sorting!");
     printf("\ttime(ms): %d\n", (int)(time * 1000));
-    puts("");
+    new_line();
 
     if (do_check) {
         puts("checking...");
@@ -196,9 +161,19 @@ int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, const
         }
     }
 
-    puts("");
+    new_line();
 
     return (int)(time * 1000);
+}
+
+int test_condition(SortAlgorithm func, const Config *config, bool do_check, const char *algorithm_name) {
+    puts("generating test case...");
+    Data data = gen_data(config);
+    puts("test case is generated");
+    print_config(config);
+    new_line();
+
+    return test_condition_with_data(func, data, do_check, algorithm_name);
 }
 
 void selection_sort(Data data) {
@@ -344,7 +319,7 @@ void merge_sort(Data data) {
 
 int main() {
     Config config;
-    config.data_size = 1e8;
+    config.data_size = 1e5;
     config.seed = 1;
     config.mode = RANDOM;
 
@@ -354,9 +329,9 @@ int main() {
     print_config(&config);
     new_line();
 
-    // TEST_CONDITION_WITH_DATA(selection_sort, data, true);
-    // TEST_CONDITION_WITH_DATA(insertion_sort, data, true);
-    // TEST_CONDITION_WITH_DATA(bubble_sort, data, true);
+    TEST_CONDITION_WITH_DATA(selection_sort, data, true);
+    TEST_CONDITION_WITH_DATA(insertion_sort, data, true);
+    TEST_CONDITION_WITH_DATA(bubble_sort, data, true);
     TEST_CONDITION_WITH_DATA(quick_sort, data, true);
     TEST_CONDITION_WITH_DATA(merge_sort, data, true);
 
