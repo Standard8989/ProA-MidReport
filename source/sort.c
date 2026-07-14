@@ -7,11 +7,13 @@
 #include <string.h>
 #include <time.h>
 
-#define TEST_CONDITION(func, config, do_check) test_condition(func, &config, do_check, #func)
-#define TEST_CONDITION_WITH_DATA(func, data, do_check) test_condition_with_data(func, data, do_check, #func)
+#define TEST_CONDITION(func, config, do_check, show_data) test_condition(func, &config, do_check, show_data, #func)
+#define TEST_CONDITION_WITH_DATA(func, data, do_check, show_data) test_condition_with_data(func, data, do_check, show_data, #func)
 
 #define MIN(lhs, rhs) ((lhs) < (rhs) ? (lhs) : (rhs))
 const char *PRINT_CONFIG_INDENT = "    ";
+const size_t NEW_LINE_COUNT = 10;
+const size_t ALGORITHM_COUNT = 5;
 
 typedef struct {
     int *data;
@@ -22,12 +24,14 @@ typedef enum {
     RANDOM,
     PARTIAL_RANDOM,
     REVERSE,
+    INPUT,
 } Mode;
 
 const char *mode_name[] = {
     "RANDOM",
     "PARTIAL_RANDOM",
     "REVERSE",
+    "INPUT",
 };
 
 typedef struct {
@@ -43,7 +47,7 @@ Data alloc_data(const size_t size) {
     data.data = (int *)malloc(sizeof(int) * size);
 
     if (data.data == NULL) {
-        fprintf(stderr, "error: in alloc_data(), failed to allocate %zu bytes.\n", size);
+        fprintf(stderr, "error: in alloc_data(), failed to allocate %zu bytes.\n", sizeof(int) * size);
         fprintf(stderr, "malloc error(%s)", strerror(errno));
 
         exit(1);
@@ -133,11 +137,15 @@ void new_line() {
 
 typedef void (*SortAlgorithm)(Data);
 
-int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, const char *algorithm_name) {
+int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, bool show_data, const char *algorithm_name) {
+    printf("copying data...");
+    Data data_copy = alloc_data(data.size);
+    memcpy(data_copy.data, data.data, sizeof(data.data[0]) * data.size);
+    printf("copied!");
     printf("start sorting with: %s\n", algorithm_name);
     puts("sorting...");
     get_elapsed_time();
-    func(data);
+    func(data_copy);
     double time = get_elapsed_time();
     puts("finished sorting!");
     printf("\ttime(ms): %d\n", (int)(time * 1000));
@@ -146,8 +154,8 @@ int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, const
     if (do_check) {
         puts("checking...");
         bool flag = true;
-        for (size_t i = 1; i < data.size; i++) {
-            if (data.data[i - 1] > data.data[i]) {
+        for (size_t i = 1; i < data_copy.size; i++) {
+            if (data_copy.data[i - 1] > data_copy.data[i]) {
                 flag = false;
                 break;
             }
@@ -166,14 +174,16 @@ int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, const
     return (int)(time * 1000);
 }
 
-int test_condition(SortAlgorithm func, const Config *config, bool do_check, const char *algorithm_name) {
+int test_condition(SortAlgorithm func, const Config *config, bool do_check, bool show_data, const char *algorithm_name) {
     puts("generating test case...");
     Data data = gen_data(config);
     puts("test case is generated");
     print_config(config);
     new_line();
 
-    return test_condition_with_data(func, data, do_check, algorithm_name);
+    int value = test_condition_with_data(func, data, do_check, show_data, algorithm_name);
+    free_data(data);
+    return value;
 }
 
 void selection_sort(Data data) {
@@ -317,25 +327,112 @@ void merge_sort(Data data) {
     free_data(work_space);
 }
 
+void write_csv(const char *file_name, size_t time_data_count, size_t *size_data, Data time_data) {
+    FILE *fp = fopen(file_name, "w");
+    if (fp == NULL) {
+        fprintf(stderr, "error: in write_csv(), failed to open file(file: %s).\n", sizeof(size_t) * time_data_count, file_name);
+        fprintf(stderr, "fopen error(%s)", strerror(errno));
+
+        exit(1);
+    }
+
+    for (size_t i = 0; i < time_data_count; i++) {
+        fprintf(fp, "%zu,%d\n", size_data);
+    }
+
+    fclose(fp);
+}
+
 int main() {
+    Data data;
     Config config;
     config.data_size = 1e5;
     config.seed = 1;
     config.mode = RANDOM;
 
-    puts("generating test case...");
-    Data data = gen_data(&config);
-    puts("test case is generated");
-    print_config(&config);
-    new_line();
+    printf("input data size: ");
+    scanf("%zu", &config.data_size);
 
-    TEST_CONDITION_WITH_DATA(selection_sort, data, true);
-    TEST_CONDITION_WITH_DATA(insertion_sort, data, true);
-    TEST_CONDITION_WITH_DATA(bubble_sort, data, true);
-    TEST_CONDITION_WITH_DATA(quick_sort, data, true);
-    TEST_CONDITION_WITH_DATA(merge_sort, data, true);
+    int mode_input;
+    do {
+        printf("input mode(0: RANDOM, 1: PARTIAL_RANDOM, 2: REVERSE, 3: INPUT): ");
+        scanf("%d", &mode_input);
+        new_line();
+    } while (mode_input < 0 || 3 < mode_input);
+    config.mode = (Mode)mode_input;
+
+    if (config.mode == INPUT) {
+        data = alloc_data(config.data_size);
+
+        printf("input data\n>>");
+        for (size_t i = 0; i < config.data_size; i++) {
+            scanf("%d", data.data + i);
+        }
+
+        printf("given data is");
+        for (size_t i = 0; i < config.data_size; i++) {
+            if (i % NEW_LINE_COUNT == 0) {
+                printf("\n>>");
+            }
+
+            printf("%4d ", data.data[i]);
+        }
+        new_line();
+        new_line();
+    }
+    else {
+        printf("input seed: ");
+        scanf("%u", &config.seed);
+
+        puts("generating test case...");
+        data = gen_data(&config);
+        puts("test case is generated");
+        print_config(&config);
+        new_line();
+    }
+
+    Data time_data[ALGORITHM_COUNT];
+
+    size_t time_data_count = 1;
+    for (size_t size = 10; size < config.data_size; size *= 2) {
+        time_data_count++;
+    }
+
+    for (size_t i = 0; i < ALGORITHM_COUNT + 1; i++) {
+        time_data[i] = alloc_data(time_data_count);
+    }
+
+    size_t *size_data = malloc(time_data_count * sizeof(size_t));
+    if (size_data == NULL) {
+        fprintf(stderr, "error: in main(), failed to allocate %zu bytes.\n", sizeof(size_t) * time_data_count);
+        fprintf(stderr, "malloc error(%s)", strerror(errno));
+
+        exit(1);
+    }
+
+    time_data_count = 0;
+    for (size_t size = 10; size < config.data_size; size *= 2) {
+        size_t time_data_accessor = 0;
+        data.size = size;
+
+        size_data[time_data_count] = size;
+        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(selection_sort, data, true, false);
+        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(insertion_sort, data, true, false);
+        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(bubble_sort, data, true, false);
+        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(quick_sort, data, true, false);
+        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(merge_sort, data, true, false);
+
+        time_data_count++;
+    }
+
+    write_csv("selection_sort.csv", time_data_count, size_data, time_data[0]);
+    write_csv("insertion_sort.csv", time_data_count, size_data, time_data[1]);
+    write_csv("bubble_sort.csv", time_data_count, size_data, time_data[2]);
+    write_csv("quick_sort.csv", time_data_count, size_data, time_data[3]);
+    write_csv("merge_sort.csv", time_data_count, size_data, time_data[4]);
 
     free_data(data);
+    free(size_data);
 
     return 0;
 }
