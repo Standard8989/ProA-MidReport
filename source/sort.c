@@ -90,6 +90,13 @@ Data gen_data(const Config *config) {
         }
         break;
 
+    case INPUT:
+        printf("input data\n>> ");
+        for (size_t i = 0; i < config->data_size; i++) {
+            scanf("%d", data.data + i);
+        }
+        break;
+
     default:
         fprintf(stderr, "error: in gen_data(), 'config->mode' should be set defined in 'Mode'.\n");
         exit(1);
@@ -107,7 +114,9 @@ double get_elapsed_time() {
 
 void print_config(const Config *config) {
     printf("%smode: %s\n", PRINT_CONFIG_INDENT, mode_name[config->mode]);
-    printf("%sseed: %u\n", PRINT_CONFIG_INDENT, config->seed);
+    if (config->mode != INPUT) {
+        printf("%sseed: %u\n", PRINT_CONFIG_INDENT, config->seed);
+    }
     printf("%sdata_size: %zu\n", PRINT_CONFIG_INDENT, config->data_size);
     if (config->mode == PARTIAL_RANDOM) {
         printf("%sration: %lf\n", PRINT_CONFIG_INDENT, config->ration);
@@ -138,10 +147,14 @@ void new_line() {
 typedef void (*SortAlgorithm)(Data);
 
 int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, bool show_data, const char *algorithm_name) {
-    printf("copying data...");
+    if (show_data) {
+        puts("data before sorted");
+        print_data(data);
+    }
+    puts("copying data...");
     Data data_copy = alloc_data(data.size);
     memcpy(data_copy.data, data.data, sizeof(data.data[0]) * data.size);
-    printf("copied!");
+    puts("copied!");
     printf("start sorting with: %s\n", algorithm_name);
     puts("sorting...");
     get_elapsed_time();
@@ -150,6 +163,11 @@ int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, bool 
     puts("finished sorting!");
     printf("\ttime(ms): %d\n", (int)(time * 1000));
     new_line();
+
+    if (show_data) {
+        puts("data after sorted");
+        print_data(data_copy);
+    }
 
     if (do_check) {
         puts("checking...");
@@ -170,6 +188,8 @@ int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, bool 
     }
 
     new_line();
+
+    free_data(data_copy);
 
     return (int)(time * 1000);
 }
@@ -330,14 +350,14 @@ void merge_sort(Data data) {
 void write_csv(const char *file_name, size_t time_data_count, size_t *size_data, Data time_data) {
     FILE *fp = fopen(file_name, "w");
     if (fp == NULL) {
-        fprintf(stderr, "error: in write_csv(), failed to open file(file: %s).\n", sizeof(size_t) * time_data_count, file_name);
+        fprintf(stderr, "error: in write_csv(), failed to open file(file: %s).\n", file_name);
         fprintf(stderr, "fopen error(%s)", strerror(errno));
 
         exit(1);
     }
 
     for (size_t i = 0; i < time_data_count; i++) {
-        fprintf(fp, "%zu,%d\n", size_data);
+        fprintf(fp, "%zu,%d\n", size_data[i], time_data.data[i]);
     }
 
     fclose(fp);
@@ -357,39 +377,18 @@ int main() {
     do {
         printf("input mode(0: RANDOM, 1: PARTIAL_RANDOM, 2: REVERSE, 3: INPUT): ");
         scanf("%d", &mode_input);
-        new_line();
     } while (mode_input < 0 || 3 < mode_input);
     config.mode = (Mode)mode_input;
 
-    if (config.mode == INPUT) {
-        data = alloc_data(config.data_size);
-
-        printf("input data\n>>");
-        for (size_t i = 0; i < config.data_size; i++) {
-            scanf("%d", data.data + i);
-        }
-
-        printf("given data is");
-        for (size_t i = 0; i < config.data_size; i++) {
-            if (i % NEW_LINE_COUNT == 0) {
-                printf("\n>>");
-            }
-
-            printf("%4d ", data.data[i]);
-        }
-        new_line();
-        new_line();
-    }
-    else {
+    if (config.mode != INPUT) {
         printf("input seed: ");
         scanf("%u", &config.seed);
-
-        puts("generating test case...");
-        data = gen_data(&config);
-        puts("test case is generated");
-        print_config(&config);
-        new_line();
     }
+    puts("generating test case...");
+    data = gen_data(&config);
+    puts("test case is generated");
+    print_config(&config);
+    new_line();
 
     Data time_data[ALGORITHM_COUNT];
 
@@ -398,7 +397,7 @@ int main() {
         time_data_count++;
     }
 
-    for (size_t i = 0; i < ALGORITHM_COUNT + 1; i++) {
+    for (size_t i = 0; i < ALGORITHM_COUNT; i++) {
         time_data[i] = alloc_data(time_data_count);
     }
 
@@ -432,6 +431,9 @@ int main() {
     write_csv("merge_sort.csv", time_data_count, size_data, time_data[4]);
 
     free_data(data);
+    for (size_t i = 0; i < ALGORITHM_COUNT; i++) {
+        free_data(time_data[i]);
+    }
     free(size_data);
 
     return 0;
