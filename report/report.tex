@@ -180,7 +180,7 @@ succeed!
 \subsection{RANDOM}
 配列の要素の数$n$がソートの性能にどのような影響を与えるかを確認するため、配列の要素の数$n$を1から65536までさまざまに変え、クイックソート、マージソートを除くソートに要する実行時間を計測した。
 配列の各要素の初期値としては乱数を用いた。
-計測に用いた環境を表に記す。
+計測に用いたコンピュータの諸元を表\ref{tab:pc}に示す。
 以降の結果は10種類の乱数シードを用いた結果の平均である。
 なお、評価に用いたプログラムを付録に示す。
 
@@ -301,7 +301,7 @@ succeed!
 \subsection{REVERSE}
 また、同様にしてmodeをREVERSEにした場合のソートも実行した。
 
-図\ref{fig:bubre}を見るとバブルソート、挿入ソートは順当に遅くなっているが選択ソートはほとんど時間が変わっていない。これは選択ソートは毎回の走査でソートされていない部分の全ての要素を見なければならず、配列が逆になっていようが大して変わらないからだと思われる。
+図\ref{fig:bubrev}を見るとバブルソート、挿入ソートは順当に遅くなっているが選択ソートはほとんど時間が変わっていない。これは選択ソートは毎回の走査でソートされていない部分の全ての要素を見なければならず、配列が逆になっていようが大して変わらないからだと思われる。
 次に、クイックソートとマージソートで逆に早くなっている理由は、逆ソートされた配列の作り方に問題があり、両方とも左右に分割してその左右をそれぞれソートしていくアルゴリズムだが、これは左右分割がちょうど結果として出てくる配列の中央と同じになっている時が最高効率である。そして逆ソート配列は配列の大きさnにたいして1ずつ小さくなるように作られているのでこの最高効率の配列が常に渡されるということだ。よってとても速い。
 
 \begin{center}
@@ -390,11 +390,28 @@ succeed!
   \label{fig:merrev}
 \end{center}
 
+\begin{table}[htb]
+\begin{center}
+\caption{性能評価に用いた環境}
+\label{tab:pc}
+\begin{tabular}{|l|l|l|}
+\hline
+CPU & Ryzen 7 3.8 GHz \\
+Memory & 4 GB \\
+OS & Ubuntu 24.04(WSL) \\
+Cコンパイラ & gcc \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
 \section{感想}
 謎のこだわりを発揮し要らない所まで抽象化したりしていたのでかなり時間がかかってしまった。次は最低限のプログラムにするように考える。
 単位ください。
 
-\subsection{作成したプログラム}
+そして今考えたら割合はrationじゃなくてratioだなって
+
+\section{作成したプログラム}
 \label{sec:program}
 
 \small{
@@ -868,6 +885,22 @@ void average_tester() {
         free_data(time_data[i]);
     }
     free(size_data);
+}
+
+void normal_mode() {
+    Data data;
+    Config config;
+
+    input_config(&config);
+
+    puts("generating test case...");
+    data = gen_data(&config);
+    puts("test case is generated");
+    print_config(&config);
+    new_line();
+
+    TEST_CONDITION_WITH_DATA(insertion_sort, data, true, true);
+    TEST_CONDITION_WITH_DATA(bubble_sort, data, true, true);
 }
 
 int main() {

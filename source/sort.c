@@ -470,7 +470,19 @@ void average_tester() {
 }
 
 void normal_mode() {
-    
+    Data data;
+    Config config;
+
+    input_config(&config);
+
+    puts("generating test case...");
+    data = gen_data(&config);
+    puts("test case is generated");
+    print_config(&config);
+    new_line();
+
+    TEST_CONDITION_WITH_DATA(insertion_sort, data, true, true);
+    TEST_CONDITION_WITH_DATA(bubble_sort, data, true, true);
 }
 
 int main() {

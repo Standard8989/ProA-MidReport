@@ -1,4 +1,4 @@
-This is e-upTeX, Version 3.141592653-p4.1.0-u1.29-230214-2.6 (utf8.euc) (TeX Live 2023/Debian) (preloaded format=platex 2026.4.15)  16 JUL 2026 07:00
+This is e-upTeX, Version 3.141592653-p4.1.0-u1.29-230214-2.6 (utf8.euc) (TeX Live 2023/Debian) (preloaded format=platex 2026.4.15)  16 JUL 2026 07:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -631,132 +631,128 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 4.805pt on input line 62.
  [2] [3] [4] [5]
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 226.
+(Font)              scaled to size 8.64899pt on input line 230.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 226.
- [6]
+(Font)              scaled to size 8.64899pt on input line 230.
+ [6] [7]
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 390.
+(Font)              scaled to size 8.64899pt on input line 418.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 390.
+(Font)              scaled to size 8.64899pt on input line 418.
 
-Overfull \hbox (90.27196pt too wide) in paragraph at lines 950--950
+Overfull \hbox (90.27196pt too wide) in paragraph at lines 994--994
 []\OT1/cmtt/m/n/9 #define TEST_CONDITION(func, config, do_check, show_data) test_condition(func, &config, do_check, show_data, #func)[] 
  []
 
 
-Overfull \hbox (161.14613pt too wide) in paragraph at lines 950--950
+Overfull \hbox (161.14613pt too wide) in paragraph at lines 994--994
 []\OT1/cmtt/m/n/9 #define TEST_CONDITION_WITH_DATA(func, data, do_check, show_data) test_condition_with_data(func, data, do_check, show_data, #func)[] 
  []
 
-[7]
-Overfull \hbox (33.57262pt too wide) in paragraph at lines 950--950
+[8]
+Overfull \hbox (33.57262pt too wide) in paragraph at lines 994--994
 []        \OT1/cmtt/m/n/9 fprintf(stderr, "error: in alloc_data(), failed to allocate %zu bytes.\n", sizeof(int) * size);[] 
  []
 
-[8]
-Overfull \hbox (33.57262pt too wide) in paragraph at lines 950--950
+[9]
+Overfull \hbox (33.57262pt too wide) in paragraph at lines 994--994
 []            \OT1/cmtt/m/n/9 fprintf(stderr, "error: in gen_data(), 'config->ration' should be set between 0 and 1.\n");[] 
  []
 
 
-Overfull \hbox (14.67284pt too wide) in paragraph at lines 950--950
+Overfull \hbox (14.67284pt too wide) in paragraph at lines 994--994
 []        \OT1/cmtt/m/n/9 fprintf(stderr, "error: in gen_data(), 'config->mode' should be set defined in 'Mode'.\n");[] 
  []
 
-[9]
-Overfull \hbox (113.89668pt too wide) in paragraph at lines 950--950
+[10]
+Overfull \hbox (113.89668pt too wide) in paragraph at lines 994--994
 []\OT1/cmtt/m/n/9 int test_condition_with_data(SortAlgorithm func, Data data, bool do_check, bool show_data, const char *algorithm_name) {[] 
  []
 
-[10]
-Overfull \hbox (118.62163pt too wide) in paragraph at lines 950--950
+[11]
+Overfull \hbox (118.62163pt too wide) in paragraph at lines 994--994
 []\OT1/cmtt/m/n/9 int test_condition(SortAlgorithm func, const Config *config, bool do_check, bool show_data, const char *algorithm_name) {[] 
  []
 
-[11] [12] [13]
-Overfull \hbox (151.69624pt too wide) in paragraph at lines 950--950
+[12] [13] [14]
+Overfull \hbox (151.69624pt too wide) in paragraph at lines 994--994
 []                \OT1/cmtt/m/n/9 data.data[left_accessor] < data.data[right_accessor] ? data.data[left_accessor++] : data.data[right_accessor++];[] 
  []
 
 
-Overfull \hbox (9.94789pt too wide) in paragraph at lines 950--950
+Overfull \hbox (9.94789pt too wide) in paragraph at lines 994--994
 []\OT1/cmtt/m/n/9 void write_csv(const char *file_name, size_t time_data_count, size_t *size_data, Data time_data) {[] 
  []
 
-[14] [15]
-Overfull \hbox (71.37218pt too wide) in paragraph at lines 950--950
+[15]
+Overfull \hbox (71.37218pt too wide) in paragraph at lines 994--994
 []        \OT1/cmtt/m/n/9 fprintf(stderr, "error: in main(), failed to allocate %zu bytes.\n", sizeof(size_t) * time_data_count);[] 
  []
 
-
-Overfull \hbox (0.498pt too wide) in paragraph at lines 950--950
+[16]
+Overfull \hbox (0.498pt too wide) in paragraph at lines 994--994
 []        \OT1/cmtt/m/n/9 printf("finished sorting %f%%...\n", (double)time_data_counter / time_data_count * 100);[] 
  []
 
 
-Overfull \hbox (19.39778pt too wide) in paragraph at lines 950--950
+Overfull \hbox (19.39778pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 // write_csv("selection_sort.csv", time_data_count, size_data, time_data[time_data_accessor++]);[] 
  []
 
 
-Overfull \hbox (19.39778pt too wide) in paragraph at lines 950--950
+Overfull \hbox (19.39778pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 // write_csv("insertion_sort.csv", time_data_count, size_data, time_data[time_data_accessor++]);[] 
  []
 
 
-Overfull \hbox (5.22295pt too wide) in paragraph at lines 950--950
+Overfull \hbox (5.22295pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 // write_csv("bubble_sort.csv", time_data_count, size_data, time_data[time_data_accessor++]);[] 
  []
 
-[16] [17]
-Overfull \hbox (85.54701pt too wide) in paragraph at lines 950--950
+[17] [18]
+Overfull \hbox (85.54701pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 //     fprintf(stderr, "error: in main(), failed to allocate %zu bytes.\n", sizeof(size_t) * time_data_count);[] 
  []
 
 
-Overfull \hbox (151.69624pt too wide) in paragraph at lines 950--950
+Overfull \hbox (151.69624pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(selection_sort, data, false, false);[] 
  []
 
 
-Overfull \hbox (151.69624pt too wide) in paragraph at lines 950--950
+Overfull \hbox (151.69624pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(insertion_sort, data, false, false);[] 
  []
 
 
-Overfull \hbox (137.52141pt too wide) in paragraph at lines 950--950
+Overfull \hbox (137.52141pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(bubble_sort, data, false, false);[] 
  []
 
 
-Overfull \hbox (132.79646pt too wide) in paragraph at lines 950--950
+Overfull \hbox (132.79646pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(quick_sort, data, false, false);[] 
  []
 
 
-Overfull \hbox (132.79646pt too wide) in paragraph at lines 950--950
+Overfull \hbox (132.79646pt too wide) in paragraph at lines 994--994
 []    \OT1/cmtt/m/n/9 //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(merge_sort, data, false, false);[] 
  []
 
-[18] [19] (output/report.aux)
+[19] [20] (output/report.aux)
  ***********
 pLaTeX2e <2023-02-14>+1, based on
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
  ) 
 Here is how much of TeX's memory you used:
- 21970 strings out of 474880
- 472004 string characters out of 5763303
- 2069820 words of memory out of 5000000
- 43848 multiletter control sequences out of 15000+600000
+ 21971 strings out of 474880
+ 472012 string characters out of 5763303
+ 2112820 words of memory out of 5000000
+ 43849 multiletter control sequences out of 15000+600000
  573784 words of font info for 111 fonts, out of 8000000 for 9000
  934 hyphenation exceptions out of 8191
  102i,12n,117p,535b,1490s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on output/report.dvi (20 pages, 121404 bytes).
+Output written on output/report.dvi (21 pages, 125352 bytes).
