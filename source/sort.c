@@ -12,8 +12,9 @@
 
 #define MIN(lhs, rhs) ((lhs) < (rhs) ? (lhs) : (rhs))
 const char *PRINT_CONFIG_INDENT = "    ";
-const size_t NEW_LINE_COUNT = 10;
-const size_t ALGORITHM_COUNT = 5;
+#define NEW_LINE_COUNT 10
+#define ALGORITHM_COUNT 2
+#define AVERAGE_COUNT 10
 
 typedef struct {
     int *data;
@@ -58,6 +59,8 @@ Data alloc_data(const size_t size) {
 
 void free_data(Data data) {
     free(data.data);
+    data.size = 0;
+    data.data = NULL;
 }
 
 // 配列用データを生成する関数
@@ -363,37 +366,43 @@ void write_csv(const char *file_name, size_t time_data_count, size_t *size_data,
     fclose(fp);
 }
 
-int main() {
-    Data data;
-    Config config;
-    config.data_size = 1e5;
-    config.seed = 1;
-    config.mode = RANDOM;
-
+void input_config(Config *config) {
     printf("input data size: ");
-    scanf("%zu", &config.data_size);
+    scanf("%zu", &config->data_size);
 
     int mode_input;
     do {
         printf("input mode(0: RANDOM, 1: PARTIAL_RANDOM, 2: REVERSE, 3: INPUT): ");
         scanf("%d", &mode_input);
     } while (mode_input < 0 || 3 < mode_input);
-    config.mode = (Mode)mode_input;
+    config->mode = (Mode)mode_input;
 
-    if (config.mode != INPUT) {
+    if (config->mode != INPUT) {
         printf("input seed: ");
-        scanf("%u", &config.seed);
+        scanf("%u", &config->seed);
     }
-    puts("generating test case...");
-    data = gen_data(&config);
-    puts("test case is generated");
-    print_config(&config);
-    new_line();
+}
+
+void average_tester() {
+    Data data[AVERAGE_COUNT];
+    Config config;
+
+    input_config(&config);
+
+    for (size_t i = 0; i < AVERAGE_COUNT; i++) {
+        config.seed++;
+
+        puts("generating test case...");
+        data[i] = gen_data(&config);
+        puts("test case is generated");
+        print_config(&config);
+        new_line();
+    }
 
     Data time_data[ALGORITHM_COUNT];
 
-    size_t time_data_count = 1;
-    for (size_t size = 10; size < config.data_size; size *= 2) {
+    size_t time_data_count = 0;
+    for (size_t size = 1; size < config.data_size; size *= 2) {
         time_data_count++;
     }
 
@@ -409,32 +418,146 @@ int main() {
         exit(1);
     }
 
-    time_data_count = 0;
-    for (size_t size = 10; size < config.data_size; size *= 2) {
-        size_t time_data_accessor = 0;
-        data.size = size;
+    size_t time_data_counter = 0;
+    long long time_data_accessor = 0;
+    for (size_t size = 1; size < config.data_size; size *= 2) {
 
-        size_data[time_data_count] = size;
-        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(selection_sort, data, true, false);
-        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(insertion_sort, data, true, false);
-        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(bubble_sort, data, true, false);
-        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(quick_sort, data, true, false);
-        time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(merge_sort, data, true, false);
+        size_data[time_data_counter] = size;
+        for (size_t i = 0; i < AVERAGE_COUNT; i++) {
+            time_data_accessor = 0;
+            data[i].size = size;
 
-        time_data_count++;
+            // time_data[time_data_accessor++].data[time_data_counter] +=
+            //     TEST_CONDITION_WITH_DATA(selection_sort, *(data + i), false, false);
+            // time_data[time_data_accessor++].data[time_data_counter] +=
+            //     TEST_CONDITION_WITH_DATA(insertion_sort, *(data + i), false, false);
+            // time_data[time_data_accessor++].data[time_data_counter] +=
+            //     TEST_CONDITION_WITH_DATA(bubble_sort, *(data + i), false, false);
+            time_data[time_data_accessor++].data[time_data_counter] +=
+                TEST_CONDITION_WITH_DATA(quick_sort, *(data + i), false, false);
+            time_data[time_data_accessor++].data[time_data_counter] +=
+                TEST_CONDITION_WITH_DATA(merge_sort, *(data + i), false, false);
+        }
+
+        time_data_accessor--;
+        for (; time_data_accessor >= 0; time_data_accessor--) {
+            time_data[time_data_accessor].data[time_data_counter] /= AVERAGE_COUNT;
+        }
+
+        time_data_counter++;
+        printf("finished sorting %f%%...\n", (double)time_data_counter / time_data_count * 100);
     }
 
-    write_csv("selection_sort.csv", time_data_count, size_data, time_data[0]);
-    write_csv("insertion_sort.csv", time_data_count, size_data, time_data[1]);
-    write_csv("bubble_sort.csv", time_data_count, size_data, time_data[2]);
-    write_csv("quick_sort.csv", time_data_count, size_data, time_data[3]);
-    write_csv("merge_sort.csv", time_data_count, size_data, time_data[4]);
+    time_data_accessor = 0;
+    // write_csv("selection_sort.csv", time_data_count, size_data, time_data[time_data_accessor++]);
+    // write_csv("insertion_sort.csv", time_data_count, size_data, time_data[time_data_accessor++]);
+    // write_csv("bubble_sort.csv", time_data_count, size_data, time_data[time_data_accessor++]);
+    write_csv("quick_sort.csv", time_data_count, size_data, time_data[time_data_accessor++]);
+    write_csv("merge_sort.csv", time_data_count, size_data, time_data[time_data_accessor++]);
 
-    free_data(data);
+    puts("--------------------------------------------------");
+    puts("finished all sorting!!!!");
+
+    print_config(&config);
+
+    for (size_t i = 0; i < AVERAGE_COUNT; i++) {
+        free_data(data[i]);
+    }
     for (size_t i = 0; i < ALGORITHM_COUNT; i++) {
         free_data(time_data[i]);
     }
     free(size_data);
+}
+
+void normal_mode() {
+    
+}
+
+int main() {
+    average_tester();
+
+    // Data data;
+    // Config config;
+    // config.data_size = 1e5;
+    // config.seed = 1;
+    // config.mode = RANDOM;
+
+    // printf("input data size: ");
+    // scanf("%zu", &config.data_size);
+
+    // int mode_input;
+    // do {
+    //     printf("input mode(0: RANDOM, 1: PARTIAL_RANDOM, 2: REVERSE, 3: INPUT): ");
+    //     scanf("%d", &mode_input);
+    // } while (mode_input < 0 || 3 < mode_input);
+    // config.mode = (Mode)mode_input;
+
+    // if (config.mode != INPUT) {
+    //     printf("input seed: ");
+    //     scanf("%u", &config.seed);
+    // }
+    // puts("generating test case...");
+    // data = gen_data(&config);
+    // puts("test case is generated");
+    // print_config(&config);
+    // new_line();
+
+    // Data time_data[ALGORITHM_COUNT];
+
+    // size_t time_data_count = 0;
+    // for (size_t size = 1; size < config.data_size; size *= 2) {
+    //     time_data_count++;
+    // }
+
+    // for (size_t i = 0; i < ALGORITHM_COUNT; i++) {
+    //     time_data[i] = alloc_data(time_data_count);
+    // }
+
+    // size_t *size_data = malloc(time_data_count * sizeof(size_t));
+    // if (size_data == NULL) {
+    //     fprintf(stderr, "error: in main(), failed to allocate %zu bytes.\n", sizeof(size_t) * time_data_count);
+    //     fprintf(stderr, "malloc error(%s)", strerror(errno));
+
+    //     exit(1);
+    // }
+
+    // time_data_count = 0;
+    // for (size_t size = 1; size < config.data_size; size *= 2) {
+    //     size_t time_data_accessor = 0;
+    //     data.size = size;
+
+    //     size_data[time_data_count] = size;
+    //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(selection_sort, data, false, false);
+    //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(insertion_sort, data, false, false);
+    //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(bubble_sort, data, false, false);
+    //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(quick_sort, data, false, false);
+    //     time_data[time_data_accessor++].data[time_data_count] = TEST_CONDITION_WITH_DATA(merge_sort, data, false, false);
+
+    //     time_data_count++;
+    // }
+
+    // write_csv("selection_sort.csv", time_data_count, size_data, time_data[0]);
+    // write_csv("insertion_sort.csv", time_data_count, size_data, time_data[1]);
+    // write_csv("bubble_sort.csv", time_data_count, size_data, time_data[2]);
+    // write_csv("quick_sort.csv", time_data_count, size_data, time_data[3]);
+    // write_csv("merge_sort.csv", time_data_count, size_data, time_data[4]);
+
+    // puts("--------------------------------------------------");
+    // puts("finished all sorting!!!!");
+
+    // print_config(&config);
+
+    // free_data(data);
+    // for (size_t i = 0; i < ALGORITHM_COUNT; i++) {
+    //     free_data(time_data[i]);
+    // }
+    // free(size_data);
+
+    // TEST_CONDITION_WITH_DATA(selection_sort, data, true, true);
+    // TEST_CONDITION_WITH_DATA(insertion_sort, data, true, true);
+    // TEST_CONDITION_WITH_DATA(bubble_sort, data, true, true);
+    // TEST_CONDITION_WITH_DATA(quick_sort, data, true, true);
+    // TEST_CONDITION_WITH_DATA(merge_sort, data, true, true);
 
     return 0;
 }
